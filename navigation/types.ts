@@ -1,16 +1,19 @@
 export type RootStackParamList = {
   Splash: undefined;
-  Home: { mnemonic: string };
+  Home: { mnemonic: string; walletAddress: string };
   MnemonicDisplay: { mnemonic: string };
-  address: undefined;
+  Address: undefined; // capitalized for consistency
+ ConfirmRecoveryPhrase: { mnemonic: string; address: string };
 
+  // Receive flow
   Receive: undefined;
-  // Receive screens
   ReceivePrepare: undefined;
   ReceiveConfirm: undefined;
   ReceiveFinal: undefined;
-  selectedPaymentMethod:undefined;
 
-  // Send flow wrapper screen
+  // Send flow
   SendFlow: undefined;
+
+  // Other params
+  SelectedPaymentMethod: undefined;
 };

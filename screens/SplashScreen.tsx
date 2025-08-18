@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import {
   View,
   Text,
-  ActivityIndicator,
   StyleSheet,
   TouchableOpacity,
   Modal,
@@ -16,6 +15,7 @@ import { RootStackParamList } from '../navigation/types';
 import { generateMnemonic } from '@scure/bip39';
 import { wordlist } from '@scure/bip39/wordlists/english';
 import { initiateBreezSdk } from '../src/utils/initializeBreezSDK';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Splash'>;
 
@@ -44,7 +44,7 @@ const SplashScreen = () => {
     try {
       await initiateBreezSdk(mnemonic.trim());
       setModalVisible(false);
-      navigation.replace('Home', { mnemonic: mnemonic.trim() });
+      navigation.replace('Home', { mnemonic: mnemonic.trim(), walletAddress: '' });
     } catch (error) {
       console.error('Error importing wallet:', error);
       Alert.alert('Error', 'Failed to import wallet. Try again.');
@@ -63,15 +63,13 @@ const SplashScreen = () => {
       {/* Welcome text */}
       <Text style={styles.welcomeText}>Welcome to SynQ Payments</Text>
 
-
-
-      {/* Subtitle with self-custodial mention */}
+      {/* Subtitle */}
       <Text style={styles.subText}>
         Self-custodial wallet with seamless Liquid & Lightning
         power your Bitcoin experience with speed and privacy.
       </Text>
 
-      {/* Button section */}
+      {/* Buttons */}
       <View style={styles.buttonsContainer}>
         <TouchableOpacity style={styles.primaryButton} onPress={handleCreateWallet}>
           <Text style={styles.buttonText}>Create New Wallet</Text>
@@ -93,33 +91,47 @@ const SplashScreen = () => {
       <Modal
         visible={modalVisible}
         transparent
-        animationType="fade"
+        animationType="slide"
         onRequestClose={() => setModalVisible(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Enter Recovery Phrase</Text>
-            <TextInput
-              placeholder="12 or 24 word mnemonic"
-              multiline
-              numberOfLines={4}
-              value={mnemonic}
-              onChangeText={setMnemonic}
-              style={styles.input}
-              placeholderTextColor="#888"
-            />
+          <View style={styles.importContainer}>
 
-            <View style={styles.modalButtonsRow}>
-              <TouchableOpacity style={styles.modalButton} onPress={handleImport}>
-                <Text style={styles.modalButtonText}>Import</Text>
+            {/* Back Button */}
+            <TouchableOpacity
+              onPress={() => setModalVisible(false)}
+              style={styles.backButton}
+            >
+              <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
+              <Text style={styles.backButtonText}>Back</Text>
+            </TouchableOpacity>
+
+            {/* Middle Content */}
+            <View style={styles.centerContent}>
+              <Text style={styles.importTitle}>Import Wallet</Text>
+              <TextInput
+                placeholder="Enter your 12-word mnemonic"
+                multiline
+                value={mnemonic}
+                onChangeText={setMnemonic}
+                style={styles.importInput}
+                placeholderTextColor="#8E8E93"
+              />
+            </View>
+
+            {/* Bottom Buttons */}
+            <View style={styles.bottomButtons}>
+              <TouchableOpacity style={styles.importButton} onPress={handleImport}>
+                <Text style={styles.importButtonText}>Import</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.modalButton, { backgroundColor: '#6c757d' }]}
+                style={styles.cancelButton}
                 onPress={() => setModalVisible(false)}
               >
-                <Text style={styles.modalButtonText}>Cancel</Text>
+                <Text style={styles.cancelButtonText}>Cancel</Text>
               </TouchableOpacity>
             </View>
+
           </View>
         </View>
       </Modal>
@@ -189,54 +201,79 @@ const styles = StyleSheet.create({
     marginVertical: 16,
     fontFamily: 'Rubik-Regular',
   },
+
+  /** Modal Styles **/
   modalOverlay: {
     flex: 1,
-    backgroundColor: '#1e1e1e',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: '#0E0E10',
   },
-  modalContent: {
-    backgroundColor: '#1e1e1e',
-    borderRadius: 16,
-    padding: 24,
-    width: '90%',
-    alignItems: 'center',
-    elevation: 5,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    color: 'white',
-  },
-  input: {
-    width: '100%',
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 10,
-    padding: 12,
-    marginBottom: 20,
-    fontSize: 16,
-    color: '#fff',
-    backgroundColor: 'rgba(46, 43, 43, 0.4)',
-    textAlignVertical: 'top',
-  },
-  modalButtonsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-    gap: 12,
-  },
-  modalButton: {
+  importContainer: {
     flex: 1,
-    backgroundColor: '#0088CC',
-    paddingVertical: 12,
+    backgroundColor: '#0E0E10',
+    paddingTop: 60,
+  },
+  backButton: {
+    position: 'absolute',
+    top: 20,
+    left: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  backButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    marginLeft: 6,
+    fontFamily: 'Rubik-Medium',
+  },
+  centerContent: {
+    flex: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+  },
+  importTitle: {
+    color: '#FFFFFF',
+    fontSize: 22,
+    fontFamily: 'Rubik-Medium',
+    marginBottom: 20,
+  },
+  importInput: {
+    backgroundColor: '#1C1C1E',
+    borderRadius: 12,
+    padding: 16,
+    color: '#FFFFFF',
+    fontSize: 16,
+    height: 120,
+    textAlignVertical: 'top',
+    marginBottom: 24,
+  },
+  bottomButtons: {
+    position: 'absolute',
+    bottom: 30,
+    left: 20,
+    right: 20,
+  },
+  importButton: {
+    backgroundColor: '#007AFF',
+    paddingVertical: 16,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  importButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontFamily: 'Rubik-Medium',
+  },
+  cancelButton: {
+    borderWidth: 1,
+    borderColor: '#FFFFFF',
+    paddingVertical: 16,
     borderRadius: 10,
     alignItems: 'center',
   },
-  modalButtonText: {
-    color: '#fff',
+  cancelButtonText: {
+    color: '#FFFFFF',
     fontSize: 16,
-    fontWeight: 'bold',
+    fontFamily: 'Rubik-Medium',
   },
 });

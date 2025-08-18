@@ -2,52 +2,46 @@ import React, { useState } from 'react';
 import {
   View,
   Text,
+  TextInput,
   TouchableOpacity,
   StyleSheet,
-  //Alert,
   SafeAreaView,
   ScrollView,
+  Alert,
   Modal,
 } from 'react-native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
-import { RootStackParamList } from '../navigation/types';
-//import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-//import Clipboard from '@react-native-clipboard/clipboard';
+import { RootStackParamList } from '../navigation/types';
 
-type MnemonicDisplayScreenNavigationProp = NativeStackNavigationProp<
+type ConfirmRouteProp = RouteProp<RootStackParamList, 'ConfirmRecoveryPhrase'>;
+type ConfirmNavigationProp = StackNavigationProp<
   RootStackParamList,
-  'MnemonicDisplay'
+  'ConfirmRecoveryPhrase'
 >;
 
-type MnemonicDisplayScreenRouteProp = RouteProp<
-  RootStackParamList,
-  'MnemonicDisplay'
->;
-
-const MnemonicDisplayScreen = () => {
-  const navigation = useNavigation<MnemonicDisplayScreenNavigationProp>();
-  const route = useRoute<MnemonicDisplayScreenRouteProp>();
-  const { mnemonic } = route.params;
-
-  //const [copied, setCopied] = useState(false);
-  const [visible, setVisible] = useState(false);
+export default function ConfirmRecoveryPhraseScreen() {
+  const navigation = useNavigation<ConfirmNavigationProp>();
+  const route = useRoute<ConfirmRouteProp>();
+  const { mnemonic, address } = route.params;
+  const words = mnemonic.split(' ');
+  const [input4, setInput4] = useState('');
+  const [input8, setInput8] = useState('');
   const [showInfoModal, setShowInfoModal] = useState(false);
 
-  const mnemonicWords = mnemonic.split(' ');
-
-  // const copyToClipboard = () => {
-  //   Clipboard.setString(mnemonic);
-  //   setCopied(true);
-  //   setTimeout(() => setCopied(false), 2000);
-  //   Alert.alert('Copied', 'Mnemonic copied to clipboard.');
-  // };
-
-  const handleContinue = () => {
-    // Replace 'yourAddressValue' with the actual address value you want to pass
-    navigation.navigate('ConfirmRecoveryPhrase', { mnemonic, address: '' });
-
+  const handleConfirm = () => {
+    if (
+      input4.trim().toLowerCase() === words[3].trim().toLowerCase() &&
+      input8.trim().toLowerCase() === words[7].trim().toLowerCase()
+    ) {
+      navigation.navigate('Home', { mnemonic, walletAddress: address });
+    } else {
+      Alert.alert(
+        'Incorrect',
+        'The entered words do not match your recovery phrase.'
+      );
+    }
   };
 
   return (
@@ -57,54 +51,37 @@ const MnemonicDisplayScreen = () => {
           contentContainerStyle={styles.scrollContainer}
           showsVerticalScrollIndicator={false}
         >
-          <Text style={styles.title}>Your Recovery Phrase</Text>
+          <Text style={styles.title}>Confirm Recovery Phrase</Text>
           <Text style={styles.subtitle}>
-            Please write them down or store them somewhere safe.
+            Enter the 4th and 8th word of your recovery phrase
           </Text>
 
-          {/* Phrase Box */}
-          <TouchableOpacity
-            style={styles.phraseBox}
-            onPress={() => setVisible(!visible)}
-          >
-            {!visible && (
-              <View style={styles.hiddenContent}>
-                <Ionicons name="eye-off" size={28} color="#94a3b8" />
-                <Text style={styles.tapText}>Tap to view the phrase</Text>
-              </View>
-            )}
-            <View style={[styles.wordGrid, !visible && styles.hidden]}>
-              {mnemonicWords.map((word, index) => (
-                <View key={index} style={styles.wordRow}>
-                  <Text style={styles.wordIndex}>{index + 1}</Text>
+          {/* Recovery Phrase Display */}
+          <View style={styles.phraseBox}>
+            <View style={styles.wordGrid}>
+              {words.map((word, i) => (
+                <View key={i} style={styles.wordRow}>
+                  <Text style={styles.wordIndex}>{i + 1}</Text>
                   <View style={styles.wordBox}>
-                    <Text style={styles.word}>
-                      {visible ? word : '••••••'}
-                    </Text>
+                    {i === 3 || i === 7 ? (
+                      <TextInput
+                        style={styles.input}
+                        value={i === 3 ? input4 : input8}
+                        autoCapitalize="none"
+                        onChangeText={(text) =>
+                          i === 3 ? setInput4(text.toLowerCase()) : setInput8(text.toLowerCase())
+                        }
+                      />
+                    ) : (
+                      <Text style={styles.word}>{word}</Text>
+                    )}
                   </View>
                 </View>
               ))}
             </View>
-          </TouchableOpacity>
+          </View>
 
-          {/* Buttons */}
-          {/* <View style={styles.buttonRow}>
-            <TouchableOpacity
-              style={[styles.actionButton, styles.greyButton]}
-              onPress={copyToClipboard}
-            >
-              <MaterialIcons
-                name={copied ? 'check' : 'content-copy'}
-                size={20}
-                color="white"
-              />
-              <Text style={styles.buttonText}>
-                {copied ? 'Copied!' : 'Copy'}
-              </Text>
-            </TouchableOpacity>
-          </View> */}
-
-          {/* Recommendation */}
+          {/* Tip Box */}
           <View style={styles.recommendBox}>
             <Ionicons
               name="alert-circle"
@@ -113,14 +90,14 @@ const MnemonicDisplayScreen = () => {
               style={{ marginRight: 8 }}
             />
             <View>
-              <Text style={styles.recommendTitle}>Recommendation</Text>
+              <Text style={styles.recommendTitle}>Tip</Text>
               <Text style={styles.recommendText}>
-                Write down recovery phrase instead of copying it
+                Make sure you enter the correct words from your saved phrase.
               </Text>
             </View>
           </View>
 
-          {/* Info Link */}
+          {/* Learn More Link */}
           <View style={styles.infoBox}>
             <Ionicons
               name="open-outline"
@@ -136,19 +113,14 @@ const MnemonicDisplayScreen = () => {
           </View>
         </ScrollView>
 
-        {/* Continue Button */}
+        {/* Confirm Button */}
         <View style={styles.bottomButtonContainer}>
-          <TouchableOpacity
-            style={styles.continueBtn}
-            onPress={handleContinue}
-          >
-            <Text style={styles.continueText}>
-              I have saved it somewhere safe
-            </Text>
+          <TouchableOpacity style={styles.continueBtn} onPress={handleConfirm}>
+            <Text style={styles.continueText}>Confirm</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Info Modal */}
+        {/* Learn More Modal */}
         <Modal
           visible={showInfoModal}
           transparent
@@ -191,9 +163,7 @@ const MnemonicDisplayScreen = () => {
       </View>
     </SafeAreaView>
   );
-};
-
-export default MnemonicDisplayScreen;
+}
 
 const styles = StyleSheet.create({
   safeArea: {
@@ -224,27 +194,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#1E1E1E',
     borderRadius: 12,
     padding: 24,
-    height: 360,
-    alignItems: 'center',
-    justifyContent: 'center',
     marginBottom: 16,
-    position: 'relative',
-  },
-  hiddenContent: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'absolute',
-  },
-  tapText: {
-    color: '#cbd5e1',
-    marginTop: 12,
-    fontSize: 14,
   },
   wordGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    width: '100%',
   },
   wordRow: {
     width: '47%',
@@ -266,42 +221,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     flex: 1,
     height: 40,
-    alignItems: 'center',
     justifyContent: 'center',
   },
   word: {
     color: '#f8fafc',
     fontSize: 14,
     fontWeight: '500',
+    textAlign: 'center',
   },
-  hidden: {
-    opacity: 0.0,
-  },
-  buttonRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 14,
-    gap: 10,
-  },
-  actionButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 15,
-    borderRadius: 8,
-    minHeight: 50,
-  },
-  greyButton: {
-    backgroundColor: '#1E1E1E',
-    borderWidth: 1,
-    borderColor: '#CCCCCC',
-  },
-  buttonText: {
-    color: 'white',
-    fontWeight: 'bold',
-    fontSize: 16,
-    marginLeft: 8,
+  input: {
+    color: '#f8fafc',
+    fontSize: 14,
+    fontWeight: '500',
+    textAlign: 'center',
+    padding: 0,
   },
   recommendBox: {
     flexDirection: 'row',
@@ -338,7 +271,6 @@ const styles = StyleSheet.create({
   bottomButtonContainer: {
     paddingBottom: 20,
     paddingTop: 4,
-    backgroundColor: '#0f172a',
   },
   continueBtn: {
     backgroundColor: '#3b82f6',
@@ -364,16 +296,11 @@ const styles = StyleSheet.create({
     padding: 20,
     width: '100%',
     maxWidth: 400,
-    shadowColor: '#000',
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 10,
   },
   modalCloseIcon: {
     position: 'absolute',
     top: 14,
     right: 14,
-    zIndex: 1,
   },
   modalTitle: {
     fontSize: 16,

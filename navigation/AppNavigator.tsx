@@ -5,6 +5,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import SplashScreen from '../screens/SplashScreen';
 import HomeScreen from '../screens/HomeScreen';
 import MnemonicDisplayScreen from '../screens/MnemonicDisplayScreen';
+import ConfirmRecoveryPhraseScreen from '../screens/ConfirmRecoveryPhraseScreen';
 import { PrepareScreen, ConfirmScreen, FinalScreen } from '../screens/PaymentScreens';
 import SendFlow from '../screens/SendFlow';
 import type { RootStackParamList } from './types';
@@ -21,9 +22,10 @@ export default function AppNavigator() {
         {/* Initial Screens */}
         <Stack.Screen name="Splash" component={SplashScreen} />
         <Stack.Screen name="MnemonicDisplay" component={MnemonicDisplayScreen} />
+        <Stack.Screen name="ConfirmRecoveryPhrase" component={ConfirmRecoveryPhraseScreen} />
         <Stack.Screen name="Home" component={HomeScreen} />
 
-        {/* Receive Flow Screens as Transparent Modals */}
+        {/* Receive Flow */}
         <Stack.Group
           screenOptions={{
             presentation: 'transparentModal',
@@ -48,16 +50,20 @@ export default function AppNavigator() {
           />
         </Stack.Group>
 
-        {/* Send Flow as a Transparent Modal */}
-        <Stack.Screen
-          name="SendFlow"
-          component={SendFlow}
-          options={{
+        {/* Send Flow */}
+        <Stack.Group
+          screenOptions={{
             presentation: 'transparentModal',
             animation: 'fade',
             contentStyle: { backgroundColor: 'transparent' },
           }}
-        />
+        >
+          <Stack.Screen
+            name="SendFlow"
+            component={SendFlow}
+            options={{ gestureEnabled: true }}
+          />
+        </Stack.Group>
       </Stack.Navigator>
     </NavigationContainer>
   );
