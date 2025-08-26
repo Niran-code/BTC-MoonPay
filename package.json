@@ -22,6 +22,7 @@
     "bip39": "^3.1.0",
     "buffer": "^6.0.3",
     "metro-react-native-babel-transformer": "^0.77.0",
+    "nostr-tools": "^2.16.2",
     "react": "19.0.0",
     "react-native": "^0.79.2",
     "react-native-dotenv": "^3.4.11",
